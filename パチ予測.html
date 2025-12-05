@@ -115,28 +115,37 @@
             }
             manualBtn.disabled = true;
             manualResult.textContent = '解析中...';
-            try {
-                const response = await fetch(`${API_BASE_URL}/analyze_manual`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        gousei_prob: parseFloat(gouseiValue),
-                        total_spin: parseFloat(spinValue),
-                        diff: parseFloat(diffValue)
-                    })
-                });
-                if (!response.ok) {
-                    throw new Error('エラーが発生しました');
-                }
-                const data = await response.json();
-                manualResult.innerHTML = `<strong>スコア: ${data.score}</strong><br>コメント: ${data.comment}<br><details><summary>詳細情報を見る</summary><pre>${JSON.stringify(data, null, 2)}</pre></details>`;
-            } catch (err) {
-                manualResult.textContent = err.message;
-            } finally {
-                manualBtn.disabled = false;
-            }
+          try {
+    const response = await fetch(`${API_BASE_URL}/analyze_manual`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            gousei_prob: parseFloat(gouseiValue),
+            total_spin: parseFloat(spinValue),
+            diff: parseFloat(diffValue)
+        })
+    });
+
+    // レスポンス本文を一度テキストとして受け取る
+    const text = await response.text();
+
+    if (!response.ok) {
+        // HTTPステータスとサーバーからのエラーメッセージをそのまま表示
+        manualResult.textContent = `HTTP ${response.status} : ${text}`;
+        console.error('analyze_manual error', response.status, text);
+        return;
+    }
+
+    const data = JSON.parse(text);
+    manualResult.innerHTML = `<strong>スコア: ${data.score}</strong><br>コメント: ${data.comment}<br><details><summary>詳細情報を見る</summary><pre>${JSON.stringify(data, null, 2)}</pre></details>`;
+} catch (err) {
+    manualResult.textContent = `Fetchエラー: ${err.message}`;
+    console.error(err);
+} finally {
+    manualBtn.disabled = false;
+}
         });
 
         // 画像解析モード
