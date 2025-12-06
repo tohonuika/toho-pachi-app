@@ -49,6 +49,17 @@
             font-size: 0.9rem;
             box-sizing: border-box;
         }
+        textarea {
+            width: 100%;
+            min-height: 240px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            white-space: pre;
+        }
         button {
             display: inline-block;
             padding: 0.6rem 1rem;
@@ -96,49 +107,6 @@
             background: #e5e7eb;
             color: #374151;
         }
-        /* 日別カード用 */
-        .day-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-        .day-card {
-            background: #f9fafb;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            padding: 0.75rem 0.9rem 0.6rem;
-            position: relative;
-        }
-        .day-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.4rem;
-            font-size: 0.8rem;
-            color: #4b5563;
-        }
-        .day-chip {
-            background: #e5e7eb;
-            border-radius: 999px;
-            padding: 0.15rem 0.6rem;
-            font-size: 0.7rem;
-        }
-        .day-caption {
-            font-size: 0.75rem;
-            color: #6b7280;
-        }
-        .day-card-body {
-            margin-top: 0.2rem;
-        }
-        .field-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 0.5rem;
-            margin-bottom: 0.3rem;
-        }
-        .field {
-            font-size: 0.8rem;
-        }
     </style>
 </head>
 <body>
@@ -148,7 +116,8 @@
     <!-- 台スペック入力 -->
     <div class="section">
         <h2>① 台スペック入力</h2>
-        <p>大当たり分母・継続率・1回転あたりの投資を入力してください。（シミュレーション回数は内部で自動設定：現在 10,000 回）</p>
+        <p>このシートに載っている台の「大当り分母・継続率・1回転あたりの投資」を入力してください。<br>
+           モンテカルロ試行回数はサーバ側で <strong>8,000 回</strong> に固定しています。</p>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.75rem;">
             <div>
                 <label for="hit_prob_den">大当たり確率の分母 (例: 319)</label>
@@ -163,292 +132,24 @@
                 <input type="number" id="cost_per_spin" min="0" step="0.1" placeholder="例: 4">
             </div>
         </div>
-        <div class="info-box">
-            ※ Render 無料枠でも耐えるように、モンテカルロ試行回数は内部で 10,000 回に固定しています。
-        </div>
     </div>
 
-    <!-- 7日前〜当日データ -->
+    <!-- テーブル貼り付け欄 -->
     <div class="section">
-        <h2>② 過去7日 + 当日データ</h2>
+        <h2>② データ貼り付け</h2>
         <p>
-            7日前〜1日前のデータと、当日の途中までのデータを入力してください。<br>
-            最低限、<strong>総回転数 / 大当り回数 / 差玉</strong> があればOKです。
+            Excel やホールサイトから以下の形式でコピペしてください（タブ区切り or スペース区切り）。<br>
+            1行 = 1台ぶん。ヘッダー行があれば自動でスキップします。
         </p>
-
-        <div class="day-grid">
-            <!-- day1: 7日前 -->
-            <div class="day-card">
-                <div class="day-card-header">
-                    <span class="day-chip">7日前</span>
-                    <span class="day-caption">一番古い日</span>
-                </div>
-                <div class="day-card-body">
-                    <div class="field-row">
-                        <div class="field">
-                            <label>総回転数</label>
-                            <input type="number" name="day1_total_spins" step="1">
-                        </div>
-                        <div class="field">
-                            <label>大当り回数</label>
-                            <input type="number" name="day1_total_hits" step="1">
-                        </div>
-                    </div>
-                    <div class="field-row">
-                        <div class="field">
-                            <label>差玉</label>
-                            <input type="number" name="day1_net_diff" step="1">
-                        </div>
-                        <div class="field">
-                            <label>1セット最大出玉</label>
-                            <input type="number" name="day1_one_set_max" step="1">
-                        </div>
-                        <div class="field">
-                            <label>最大連チャン数</label>
-                            <input type="number" name="day1_max_chain_len" step="1">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- day2: 6日前 -->
-            <div class="day-card">
-                <div class="day-card-header">
-                    <span class="day-chip">6日前</span>
-                </div>
-                <div class="day-card-body">
-                    <div class="field-row">
-                        <div class="field">
-                            <label>総回転数</label>
-                            <input type="number" name="day2_total_spins" step="1">
-                        </div>
-                        <div class="field">
-                            <label>大当り回数</label>
-                            <input type="number" name="day2_total_hits" step="1">
-                        </div>
-                    </div>
-                    <div class="field-row">
-                        <div class="field">
-                            <label>差玉</label>
-                            <input type="number" name="day2_net_diff" step="1">
-                        </div>
-                        <div class="field">
-                            <label>1セット最大出玉</label>
-                            <input type="number" name="day2_one_set_max" step="1">
-                        </div>
-                        <div class="field">
-                            <label>最大連チャン数</label>
-                            <input type="number" name="day2_max_chain_len" step="1">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- day3: 5日前 -->
-            <div class="day-card">
-                <div class="day-card-header">
-                    <span class="day-chip">5日前</span>
-                </div>
-                <div class="day-card-body">
-                    <div class="field-row">
-                        <div class="field">
-                            <label>総回転数</label>
-                            <input type="number" name="day3_total_spins" step="1">
-                        </div>
-                        <div class="field">
-                            <label>大当り回数</label>
-                            <input type="number" name="day3_total_hits" step="1">
-                        </div>
-                    </div>
-                    <div class="field-row">
-                        <div class="field">
-                            <label>差玉</label>
-                            <input type="number" name="day3_net_diff" step="1">
-                        </div>
-                        <div class="field">
-                            <label>1セット最大出玉</label>
-                            <input type="number" name="day3_one_set_max" step="1">
-                        </div>
-                        <div class="field">
-                            <label>最大連チャン数</label>
-                            <input type="number" name="day3_max_chain_len" step="1">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- day4: 4日前 -->
-            <div class="day-card">
-                <div class="day-card-header">
-                    <span class="day-chip">4日前</span>
-                </div>
-                <div class="day-card-body">
-                    <div class="field-row">
-                        <div class="field">
-                            <label>総回転数</label>
-                            <input type="number" name="day4_total_spins" step="1">
-                        </div>
-                        <div class="field">
-                            <label>大当り回数</label>
-                            <input type="number" name="day4_total_hits" step="1">
-                        </div>
-                    </div>
-                    <div class="field-row">
-                        <div class="field">
-                            <label>差玉</label>
-                            <input type="number" name="day4_net_diff" step="1">
-                        </div>
-                        <div class="field">
-                            <label>1セット最大出玉</label>
-                            <input type="number" name="day4_one_set_max" step="1">
-                        </div>
-                        <div class="field">
-                            <label>最大連チャン数</label>
-                            <input type="number" name="day4_max_chain_len" step="1">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- day5: 3日前 -->
-            <div class="day-card">
-                <div class="day-card-header">
-                    <span class="day-chip">3日前</span>
-                </div>
-                <div class="day-card-body">
-                    <div class="field-row">
-                        <div class="field">
-                            <label>総回転数</label>
-                            <input type="number" name="day5_total_spins" step="1">
-                        </div>
-                        <div class="field">
-                            <label>大当り回数</label>
-                            <input type="number" name="day5_total_hits" step="1">
-                        </div>
-                    </div>
-                    <div class="field-row">
-                        <div class="field">
-                            <label>差玉</label>
-                            <input type="number" name="day5_net_diff" step="1">
-                        </div>
-                        <div class="field">
-                            <label>1セット最大出玉</label>
-                            <input type="number" name="day5_one_set_max" step="1">
-                        </div>
-                        <div class="field">
-                            <label>最大連チャン数</label>
-                            <input type="number" name="day5_max_chain_len" step="1">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- day6: 2日前 -->
-            <div class="day-card">
-                <div class="day-card-header">
-                    <span class="day-chip">2日前</span>
-                </div>
-                <div class="day-card-body">
-                    <div class="field-row">
-                        <div class="field">
-                            <label>総回転数</label>
-                            <input type="number" name="day6_total_spins" step="1">
-                        </div>
-                        <div class="field">
-                            <label>大当り回数</label>
-                            <input type="number" name="day6_total_hits" step="1">
-                        </div>
-                    </div>
-                    <div class="field-row">
-                        <div class="field">
-                            <label>差玉</label>
-                            <input type="number" name="day6_net_diff" step="1">
-                        </div>
-                        <div class="field">
-                            <label>1セット最大出玉</label>
-                            <input type="number" name="day6_one_set_max" step="1">
-                        </div>
-                        <div class="field">
-                            <label>最大連チャン数</label>
-                            <input type="number" name="day6_max_chain_len" step="1">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- day7: 1日前 -->
-            <div class="day-card">
-                <div class="day-card-header">
-                    <span class="day-chip">1日前</span>
-                </div>
-                <div class="day-card-body">
-                    <div class="field-row">
-                        <div class="field">
-                            <label>総回転数</label>
-                            <input type="number" name="day7_total_spins" step="1">
-                        </div>
-                        <div class="field">
-                            <label>大当り回数</label>
-                            <input type="number" name="day7_total_hits" step="1">
-                        </div>
-                    </div>
-                    <div class="field-row">
-                        <div class="field">
-                            <label>差玉</label>
-                            <input type="number" name="day7_net_diff" step="1">
-                        </div>
-                        <div class="field">
-                            <label>1セット最大出玉</label>
-                            <input type="number" name="day7_one_set_max" step="1">
-                        </div>
-                        <div class="field">
-                            <label>最大連チャン数</label>
-                            <input type="number" name="day7_max_chain_len" step="1">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- day8: 当日(途中まで) -->
-            <div class="day-card">
-                <div class="day-card-header">
-                    <span class="day-chip">当日(途中まで)</span>
-                    <span class="day-caption">昼から打つとき用</span>
-                </div>
-                <div class="day-card-body">
-                    <div class="field-row">
-                        <div class="field">
-                            <label>総回転数</label>
-                            <input type="number" name="day8_total_spins" step="1">
-                        </div>
-                        <div class="field">
-                            <label>大当り回数</label>
-                            <input type="number" name="day8_total_hits" step="1">
-                        </div>
-                    </div>
-                    <div class="field-row">
-                        <div class="field">
-                            <label>差玉</label>
-                            <input type="number" name="day8_net_diff" step="1">
-                        </div>
-                        <div class="field">
-                            <label>1セット最大出玉</label>
-                            <input type="number" name="day8_one_set_max" step="1">
-                        </div>
-                        <div class="field">
-                            <label>最大連チャン数</label>
-                            <input type="number" name="day8_max_chain_len" step="1">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+        <div class="info-box">
+            例:<br>
+<pre style="margin:0;font-family:monospace;font-size:0.8rem;white-space:pre;">
+台番号  大当り  大当り確率  スタート  総回転数  前日最終スタート  初当り  最大持玉  差玉  1セット最大出玉  最大連チャン数
+168    13   1/100.0  615  1300  108  1  17080  5620   17060  13
+170     7   1/176.4  362  1235  453  3   4230 -6980    4220   3
+...</pre>
         </div>
-
-        <div class="info-box" style="margin-top:0.75rem;">
-            ※ 何も入力のない枠は無視されます。<br>
-            ※ 当日の途中までの履歴がある場合は、一番下の「当日(途中まで)」に入力してください。
-        </div>
+        <textarea id="dataInput" placeholder="ここにコピーした表を貼り付けてください"></textarea>
     </div>
 
     <!-- 実行ボタン & 結果 -->
@@ -466,47 +167,65 @@
 
     const simulateBtn = document.getElementById('simulateBtn');
     const resultDiv   = document.getElementById('result');
-
-    function getInputValue(name) {
-        const el = document.querySelector(`[name="${name}"]`);
-        return el ? el.value : '';
-    }
+    const dataInput   = document.getElementById('dataInput');
 
     simulateBtn.addEventListener('click', async () => {
         const hitProbDen   = document.getElementById('hit_prob_den').value;
         const continueProb = document.getElementById('continue_prob').value;
         const costPerSpin  = document.getElementById('cost_per_spin').value;
+        const rawData      = dataInput.value;
 
         if (!hitProbDen || !continueProb || !costPerSpin) {
             resultDiv.textContent = '大当たり分母・継続率・1回転あたり投資は必須です。';
             return;
         }
+        if (!rawData.trim()) {
+            resultDiv.textContent = '台データを貼り付けてください。';
+            return;
+        }
 
-        // 日別データをまとめる
-        const days = [];
-        for (let i = 1; i <= 8; i++) {
-            const spins = getInputValue(`day${i}_total_spins`);
-            const hits  = getInputValue(`day${i}_total_hits`);
-            const diff  = getInputValue(`day${i}_net_diff`);
-            const oneMax = getInputValue(`day${i}_one_set_max`);
-            const maxChain = getInputValue(`day${i}_max_chain_len`);
+        // テキストから行ごとにパース
+        const rows = [];
+        const lines = rawData.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
 
-            // 全部空ならスキップ
-            if (!spins && !hits && !diff && !oneMax && !maxChain) {
+        for (const line of lines) {
+            // ヘッダー行スキップ
+            if (line.startsWith('台番号') || line.startsWith('台番')) {
                 continue;
             }
 
-            days.push({
-                total_spins: spins ? parseInt(spins, 10) : 0,
-                total_hits: hits ? parseInt(hits, 10) : 0,
-                net_diff: diff ? parseFloat(diff) : 0,
-                one_set_max: oneMax ? parseFloat(oneMax) : 0,
-                max_chain_len: maxChain ? parseInt(maxChain, 10) : 0
+            const parts = line.split(/\s+/);
+            // 必要最低限 11列ないとダメ
+            if (parts.length < 11) {
+                console.warn('列数不足でスキップ:', line);
+                continue;
+            }
+
+            const machine_no   = parts[0];            // 台番号
+            const total_hits   = parseInt(parts[1], 10) || 0;   // 大当り
+            // parts[2] = 大当り確率 (1/xxx) は今回は未使用
+            const total_spins  = parseInt(parts[4], 10) || 0;   // 総回転数
+            const net_diff     = parseFloat(parts[8]) || 0;     // 差玉
+            const one_set_max  = parseFloat(parts[9]) || 0;     // 1セット最大出玉
+            const max_chain    = parseInt(parts[10], 10) || 0;  // 最大連チャン
+
+            if (!machine_no || total_spins <= 0) {
+                console.warn('無効データでスキップ:', line);
+                continue;
+            }
+
+            rows.push({
+                machine_no: machine_no,
+                total_spins: total_spins,
+                total_hits: total_hits,
+                net_diff: net_diff,
+                one_set_max: one_set_max,
+                max_chain_len: max_chain
             });
         }
 
-        if (days.length === 0) {
-            resultDiv.textContent = '少なくとも1日分のデータを入力してください。';
+        if (rows.length === 0) {
+            resultDiv.textContent = '有効な台データがありません。貼り付け内容を確認してください。';
             return;
         }
 
@@ -518,7 +237,7 @@
                 hit_prob_den: parseFloat(hitProbDen),
                 continue_prob: parseFloat(continueProb),
                 cost_per_spin: parseFloat(costPerSpin),
-                days: days   // n_sim は送らない（サーバ側で固定）
+                rows: rows
             };
 
             const response = await fetch(`${API_BASE_URL}/simulate`, {
@@ -549,38 +268,27 @@
 
     function renderResult(data) {
         if (!data.top5 || data.top5.length === 0) {
-            resultDiv.textContent = '有効な結果がありません。入力を確認してください。';
+            resultDiv.textContent = '有効な結果がありません。';
             return;
         }
 
         const avgPayout = data.avg_payout_per_hit.toFixed(1);
         const oneSetMax = data.one_set_max_est.toFixed(1);
-        const expTh = data.explosion_threshold.toFixed(1);
+        const expTh     = data.explosion_threshold.toFixed(1);
 
         const rowsHtml = data.top5.map((row, idx) => {
-            // day_index: 1〜8 → ラベル
-            let label;
-            if (row.day_index === 1) label = '7日前';
-            else if (row.day_index === 2) label = '6日前';
-            else if (row.day_index === 3) label = '5日前';
-            else if (row.day_index === 4) label = '4日前';
-            else if (row.day_index === 5) label = '3日前';
-            else if (row.day_index === 6) label = '2日前';
-            else if (row.day_index === 7) label = '1日前';
-            else label = '当日(途中まで)';
-
-            const winRate = (row.win_rate * 100).toFixed(1) + '%';
-            const avgProfit = row.avg_profit.toFixed(0);
-            const maxInvest90 = row.max_invest_90.toFixed(0);
-            const maxPayout90 = row.max_payout_90.toFixed(0);
-            const explosionRate = (row.explosion_rate * 100).toFixed(1) + '%';
-            const explosionSpins = row.explosion_rate > 0 ? row.explosion_spins_avg.toFixed(0) : '-';
+            const winRate         = (row.win_rate * 100).toFixed(1) + '%';
+            const avgProfit       = row.avg_profit.toFixed(0);
+            const maxInvest90     = row.max_invest_90.toFixed(0);
+            const maxPayout90     = row.max_payout_90.toFixed(0);
+            const explosionRate   = (row.explosion_rate * 100).toFixed(1) + '%';
+            const explosionSpins  = row.explosion_rate > 0 ? row.explosion_spins_avg.toFixed(0)   : '-';
             const explosionInvest = row.explosion_rate > 0 ? row.explosion_invest_avg.toFixed(0) : '-';
 
             return `
                 <tr>
                     <td>${idx + 1}</td>
-                    <td>${label}</td>
+                    <td>${row.machine_no}</td>
                     <td>${winRate}</td>
                     <td>${avgProfit}</td>
                     <td>${maxInvest90}</td>
@@ -594,9 +302,9 @@
 
         resultDiv.innerHTML = `
             <div class="info-box">
-                <div><span class="badge">内部推定</span> 1回の大当り平均出玉: <strong>${avgPayout}</strong></div>
+                <div><span class="badge">内部推定</span> 大当り1回あたり平均出玉: <strong>${avgPayout}</strong></div>
                 <div><span class="badge">内部推定</span> 1セット上限(目安): <strong>${oneSetMax}</strong></div>
-                <div><span class="badge">爆発条件</span> 連チャン1発あたり合計出玉が <strong>${expTh}</strong> を超えたら「爆発」と判定</div>
+                <div><span class="badge">爆発条件</span> 1回の連チャン合計出玉が <strong>${expTh}</strong> を超えたら「爆発」と判定</div>
                 <div style="margin-top:0.25rem;font-size:0.8rem;color:#6b7280;">
                     ※ モンテカルロ試行回数: <strong>${data.n_sim}</strong> 回
                 </div>
@@ -605,7 +313,7 @@
                 <thead>
                     <tr>
                         <th>順位</th>
-                        <th>日</th>
+                        <th>台番号</th>
                         <th>勝率</th>
                         <th>平均差玉</th>
                         <th>最大投資(90%目安)</th>
@@ -620,7 +328,8 @@
                 </tbody>
             </table>
             <p style="font-size:0.8rem;color:#666;margin-top:0.5rem;">
-                ※「爆発まで平均回転数 / 投資額」は、そのシナリオ内で実際に大きな連チャン（爆発）が起きたケースのみを平均しています。
+                ※「爆発まで平均回転数 / 投資額」は、その台で実際に大きな連チャン（爆発）が起きたシミュレーションのみを平均しています。<br>
+                ※ 勝率・最大出玉はあくまでシミュレーション上の目安です。
             </p>
         `;
     }
