@@ -224,13 +224,14 @@
                     <span class="day-chip">当日(途中まで)</span>
                     <span class="day-caption">昼から打つとき用</span>
                 </div>
-                <textarea id="day8Input" placeholder="当日の途中までの表を貼り付け（なければ空）」></textarea>
+                <textarea id="day8Input" placeholder="当日の途中までの表を貼り付け（なければ空）"></textarea>
             </div>
         </div>
 
         <div class="info-box" style="margin-top:0.75rem;">
             ※ 当日の枠 (当日(途中まで)) に1行でもデータがある場合、Monte Carlo の対象は<strong>その当日の台だけ</strong>になります。<br>
-            ※ 当日の枠が空の場合は、7日前〜1日前の台だけで Monte Carlo を行います。
+            ※ 当日の枠が空の場合は、7日前〜1日前の台だけで Monte Carlo を行います。<br>
+            ※ どちらの場合も、平均出玉などの推定には過去7日＋当日のデータをすべて使用します。
         </div>
     </div>
 
@@ -243,7 +244,8 @@
 </div>
 
 <script>
-    const API_BASE_URL = 'https://toho-pachi-backend.onrender.com';  // ←自分のURLに変更
+    // ★ここを自分のバックエンドのURLに変えてね
+    const API_BASE_URL = 'https://toho-pachi-backend.onrender.com';
 
     const simulateBtn = document.getElementById('simulateBtn');
     const resultDiv   = document.getElementById('result');
@@ -251,13 +253,17 @@
     function parseDayText(dayIndex, text) {
         const rows = [];
         const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+
         for (const line of lines) {
+            // ヘッダー行スキップ
             if (line.startsWith('台番号') || line.startsWith('台番')) continue;
+
             const parts = line.split(/\s+/);
-            if (parts.length < 11) continue; // 列数足りなければスキップ
+            if (parts.length < 11) continue; // 列数足りない
 
             const machine_no  = parts[0];
             const total_hits  = parseInt(parts[1], 10) || 0;
+            // parts[2] = 大当り確率(1/xxx) はここでは未使用
             const total_spins = parseInt(parts[4], 10) || 0; // 総回転数
             const net_diff    = parseFloat(parts[8]) || 0;   // 差玉
             const one_set_max = parseFloat(parts[9]) || 0;   // 1セット最大出玉
@@ -411,10 +417,12 @@
             </table>
             <p style="font-size:0.8rem;color:#666;margin-top:0.5rem;">
                 ※「爆発まで平均回転数 / 投資額」は、その台で実際に大きな連チャン（爆発）が起きたシミュレーションのみを平均しています。<br>
-                ※ 当日の枠にデータがある場合は、その台だけで順位付けしています。
+                ※ 当日の枠にデータがある場合は、その当日の台だけを Monte Carlo の対象にしています。<br>
+                ※ 過去7日＋当日の履歴は、平均出玉や爆発条件の推定にすべて使用しています。
             </p>
         `;
     }
 </script>
 </body>
 </html>
+
