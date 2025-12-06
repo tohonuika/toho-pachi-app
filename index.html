@@ -16,7 +16,7 @@
             color: #333;
         }
         .container {
-            max-width: 900px;
+            max-width: 960px;
             margin: 0 auto;
             background: #fff;
             border-radius: 8px;
@@ -51,7 +51,7 @@
         }
         textarea {
             width: 100%;
-            min-height: 240px;
+            min-height: 120px;
             font-family: monospace;
             font-size: 0.85rem;
             padding: 0.5rem;
@@ -107,6 +107,35 @@
             background: #e5e7eb;
             color: #374151;
         }
+        .day-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        .day-card {
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 0.75rem 0.9rem;
+        }
+        .day-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.4rem;
+            font-size: 0.8rem;
+            color: #4b5563;
+        }
+        .day-chip {
+            background: #e5e7eb;
+            border-radius: 999px;
+            padding: 0.15rem 0.6rem;
+            font-size: 0.7rem;
+        }
+        .day-caption {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
     </style>
 </head>
 <body>
@@ -116,7 +145,7 @@
     <!-- 台スペック入力 -->
     <div class="section">
         <h2>① 台スペック入力</h2>
-        <p>このシートに載っている台の「大当り分母・継続率・1回転あたりの投資」を入力してください。<br>
+        <p>このシートの台に共通する「大当り分母・継続率・1回転あたりの投資」を入力してください。<br>
            モンテカルロ試行回数はサーバ側で <strong>8,000 回</strong> に固定しています。</p>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.75rem;">
             <div>
@@ -134,22 +163,75 @@
         </div>
     </div>
 
-    <!-- テーブル貼り付け欄 -->
+    <!-- 日ごとのテキストエリア -->
     <div class="section">
-        <h2>② データ貼り付け</h2>
+        <h2>② 日ごとのデータ貼り付け</h2>
         <p>
-            Excel やホールサイトから以下の形式でコピペしてください（タブ区切り or スペース区切り）。<br>
-            1行 = 1台ぶん。ヘッダー行があれば自動でスキップします。
+            各テキストボックスに、その日の台データを貼り付けてください（タブ or スペース区切り）。<br>
+            1行 = 1台ぶん。ヘッダー行（台番号〜）はあっても構いません。
         </p>
         <div class="info-box">
-            例:<br>
-<pre style="margin:0;font-family:monospace;font-size:0.8rem;white-space:pre;">
-台番号  大当り  大当り確率  スタート  総回転数  前日最終スタート  初当り  最大持玉  差玉  1セット最大出玉  最大連チャン数
-168    13   1/100.0  615  1300  108  1  17080  5620   17060  13
-170     7   1/176.4  362  1235  453  3   4230 -6980    4220   3
-...</pre>
+            1行のフォーマット:<br>
+            <code>台番号 / 大当り / 大当り確率 / スタート / 総回転数 / 前日最終スタート / 初当り / 最大持玉 / 差玉 / 1セット最大出玉 / 最大連チャン数</code>
         </div>
-        <textarea id="dataInput" placeholder="ここにコピーした表を貼り付けてください"></textarea>
+
+        <div class="day-grid">
+            <div class="day-card">
+                <div class="day-card-header">
+                    <span class="day-chip">7日前</span>
+                    <span class="day-caption">一番古い日</span>
+                </div>
+                <textarea id="day1Input" placeholder="7日前の表を貼り付け"></textarea>
+            </div>
+            <div class="day-card">
+                <div class="day-card-header">
+                    <span class="day-chip">6日前</span>
+                </div>
+                <textarea id="day2Input" placeholder="6日前の表を貼り付け"></textarea>
+            </div>
+            <div class="day-card">
+                <div class="day-card-header">
+                    <span class="day-chip">5日前</span>
+                </div>
+                <textarea id="day3Input" placeholder="5日前の表を貼り付け"></textarea>
+            </div>
+            <div class="day-card">
+                <div class="day-card-header">
+                    <span class="day-chip">4日前</span>
+                </div>
+                <textarea id="day4Input" placeholder="4日前の表を貼り付け"></textarea>
+            </div>
+            <div class="day-card">
+                <div class="day-card-header">
+                    <span class="day-chip">3日前</span>
+                </div>
+                <textarea id="day5Input" placeholder="3日前の表を貼り付け"></textarea>
+            </div>
+            <div class="day-card">
+                <div class="day-card-header">
+                    <span class="day-chip">2日前</span>
+                </div>
+                <textarea id="day6Input" placeholder="2日前の表を貼り付け"></textarea>
+            </div>
+            <div class="day-card">
+                <div class="day-card-header">
+                    <span class="day-chip">1日前</span>
+                </div>
+                <textarea id="day7Input" placeholder="1日前の表を貼り付け"></textarea>
+            </div>
+            <div class="day-card">
+                <div class="day-card-header">
+                    <span class="day-chip">当日(途中まで)</span>
+                    <span class="day-caption">昼から打つとき用</span>
+                </div>
+                <textarea id="day8Input" placeholder="当日の途中までの表を貼り付け（なければ空）」></textarea>
+            </div>
+        </div>
+
+        <div class="info-box" style="margin-top:0.75rem;">
+            ※ 当日の枠 (当日(途中まで)) に1行でもデータがある場合、Monte Carlo の対象は<strong>その当日の台だけ</strong>になります。<br>
+            ※ 当日の枠が空の場合は、7日前〜1日前の台だけで Monte Carlo を行います。
+        </div>
     </div>
 
     <!-- 実行ボタン & 結果 -->
@@ -161,60 +243,30 @@
 </div>
 
 <script>
-    // バックエンドのURL（RenderにデプロイしたURLに合わせて変更）
-    // 例: 'https://toho-pachi-backend.onrender.com'
-    const API_BASE_URL = 'https://toho-pachi-backend.onrender.com';
+    const API_BASE_URL = 'https://toho-pachi-backend.onrender.com';  // ←自分のURLに変更
 
     const simulateBtn = document.getElementById('simulateBtn');
     const resultDiv   = document.getElementById('result');
-    const dataInput   = document.getElementById('dataInput');
 
-    simulateBtn.addEventListener('click', async () => {
-        const hitProbDen   = document.getElementById('hit_prob_den').value;
-        const continueProb = document.getElementById('continue_prob').value;
-        const costPerSpin  = document.getElementById('cost_per_spin').value;
-        const rawData      = dataInput.value;
-
-        if (!hitProbDen || !continueProb || !costPerSpin) {
-            resultDiv.textContent = '大当たり分母・継続率・1回転あたり投資は必須です。';
-            return;
-        }
-        if (!rawData.trim()) {
-            resultDiv.textContent = '台データを貼り付けてください。';
-            return;
-        }
-
-        // テキストから行ごとにパース
+    function parseDayText(dayIndex, text) {
         const rows = [];
-        const lines = rawData.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
-
+        const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
         for (const line of lines) {
-            // ヘッダー行スキップ
-            if (line.startsWith('台番号') || line.startsWith('台番')) {
-                continue;
-            }
-
+            if (line.startsWith('台番号') || line.startsWith('台番')) continue;
             const parts = line.split(/\s+/);
-            // 必要最低限 11列ないとダメ
-            if (parts.length < 11) {
-                console.warn('列数不足でスキップ:', line);
-                continue;
-            }
+            if (parts.length < 11) continue; // 列数足りなければスキップ
 
-            const machine_no   = parts[0];            // 台番号
-            const total_hits   = parseInt(parts[1], 10) || 0;   // 大当り
-            // parts[2] = 大当り確率 (1/xxx) は今回は未使用
-            const total_spins  = parseInt(parts[4], 10) || 0;   // 総回転数
-            const net_diff     = parseFloat(parts[8]) || 0;     // 差玉
-            const one_set_max  = parseFloat(parts[9]) || 0;     // 1セット最大出玉
-            const max_chain    = parseInt(parts[10], 10) || 0;  // 最大連チャン
+            const machine_no  = parts[0];
+            const total_hits  = parseInt(parts[1], 10) || 0;
+            const total_spins = parseInt(parts[4], 10) || 0; // 総回転数
+            const net_diff    = parseFloat(parts[8]) || 0;   // 差玉
+            const one_set_max = parseFloat(parts[9]) || 0;   // 1セット最大出玉
+            const max_chain   = parseInt(parts[10], 10) || 0;
 
-            if (!machine_no || total_spins <= 0) {
-                console.warn('無効データでスキップ:', line);
-                continue;
-            }
+            if (!machine_no || total_spins <= 0) continue;
 
             rows.push({
+                day_index: dayIndex,
                 machine_no: machine_no,
                 total_spins: total_spins,
                 total_hits: total_hits,
@@ -223,9 +275,29 @@
                 max_chain_len: max_chain
             });
         }
+        return rows;
+    }
+
+    simulateBtn.addEventListener('click', async () => {
+        const hitProbDen   = document.getElementById('hit_prob_den').value;
+        const continueProb = document.getElementById('continue_prob').value;
+        const costPerSpin  = document.getElementById('cost_per_spin').value;
+
+        if (!hitProbDen || !continueProb || !costPerSpin) {
+            resultDiv.textContent = '大当たり分母・継続率・1回転あたり投資は必須です。';
+            return;
+        }
+
+        let rows = [];
+        for (let dayIdx = 1; dayIdx <= 8; dayIdx++) {
+            const ta = document.getElementById(`day${dayIdx}Input`);
+            if (!ta) continue;
+            if (!ta.value.trim()) continue;
+            rows = rows.concat(parseDayText(dayIdx, ta.value));
+        }
 
         if (rows.length === 0) {
-            resultDiv.textContent = '有効な台データがありません。貼り付け内容を確認してください。';
+            resultDiv.textContent = '少なくとも1日分の台データを貼り付けてください。';
             return;
         }
 
@@ -242,14 +314,11 @@
 
             const response = await fetch(`${API_BASE_URL}/simulate`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
             const text = await response.text();
-
             if (!response.ok) {
                 resultDiv.textContent = `HTTP ${response.status} : ${text}`;
                 console.error('simulate error', response.status, text);
@@ -265,6 +334,17 @@
             simulateBtn.disabled = false;
         }
     });
+
+    function dayLabelFromIndex(idx) {
+        if (idx === 1) return '7日前';
+        if (idx === 2) return '6日前';
+        if (idx === 3) return '5日前';
+        if (idx === 4) return '4日前';
+        if (idx === 5) return '3日前';
+        if (idx === 6) return '2日前';
+        if (idx === 7) return '1日前';
+        return '当日(途中まで)';
+    }
 
     function renderResult(data) {
         if (!data.top5 || data.top5.length === 0) {
@@ -288,6 +368,7 @@
             return `
                 <tr>
                     <td>${idx + 1}</td>
+                    <td>${dayLabelFromIndex(row.day_index)}</td>
                     <td>${row.machine_no}</td>
                     <td>${winRate}</td>
                     <td>${avgProfit}</td>
@@ -313,6 +394,7 @@
                 <thead>
                     <tr>
                         <th>順位</th>
+                        <th>日</th>
                         <th>台番号</th>
                         <th>勝率</th>
                         <th>平均差玉</th>
@@ -329,7 +411,7 @@
             </table>
             <p style="font-size:0.8rem;color:#666;margin-top:0.5rem;">
                 ※「爆発まで平均回転数 / 投資額」は、その台で実際に大きな連チャン（爆発）が起きたシミュレーションのみを平均しています。<br>
-                ※ 勝率・最大出玉はあくまでシミュレーション上の目安です。
+                ※ 当日の枠にデータがある場合は、その台だけで順位付けしています。
             </p>
         `;
     }
