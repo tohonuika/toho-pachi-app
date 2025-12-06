@@ -145,8 +145,11 @@
     <!-- 台スペック入力 -->
     <div class="section">
         <h2>① 台スペック入力</h2>
-        <p>このシートの台に共通する「大当り分母・継続率・1回転あたりの投資」を入力してください。<br>
-           モンテカルロ試行回数はサーバ側で <strong>8,000 回</strong> に固定しています。</p>
+        <p>
+            このシートの台に共通する「大当り分母・継続率・1回転あたりの投資（玉）」を入力してください。<br>
+            モンテカルロ試行回数はサーバ側で <strong>8,000 回</strong> に固定しています。<br>
+            例: 4円パチで 1000円あたり14回転なら、1回転あたり ≒ 18玉。
+        </p>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.75rem;">
             <div>
                 <label for="hit_prob_den">大当たり確率の分母 (例: 319)</label>
@@ -157,8 +160,8 @@
                 <input type="number" id="continue_prob" min="0" max="100" step="0.1" placeholder="例: 81">
             </div>
             <div>
-                <label for="cost_per_spin">1回転あたりの投資 (玉 or 円)</label>
-                <input type="number" id="cost_per_spin" min="0" step="0.1" placeholder="例: 4">
+                <label for="cost_per_spin">1回転あたりの投資 (玉)</label>
+                <input type="number" id="cost_per_spin" min="0" step="0.1" placeholder="例: 18">
             </div>
         </div>
     </div>
@@ -246,6 +249,8 @@
 <script>
     // ★ここを自分のバックエンドのURLに変えてね
     const API_BASE_URL = 'https://toho-pachi-backend.onrender.com';
+    // 投資額を円表示にするためのレート（4円パチ）
+    const YEN_PER_BALL = 4;
 
     const simulateBtn = document.getElementById('simulateBtn');
     const resultDiv   = document.getElementById('result');
@@ -255,7 +260,6 @@
         const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
 
         for (const line of lines) {
-            // ヘッダー行スキップ
             if (line.startsWith('台番号') || line.startsWith('台番')) continue;
 
             const parts = line.split(/\s+/);
@@ -290,7 +294,7 @@
         const costPerSpin  = document.getElementById('cost_per_spin').value;
 
         if (!hitProbDen || !continueProb || !costPerSpin) {
-            resultDiv.textContent = '大当たり分母・継続率・1回転あたり投資は必須です。';
+            resultDiv.textContent = '大当たり分母・継続率・1回転あたり投資(玉)は必須です。';
             return;
         }
 
@@ -341,17 +345,6 @@
         }
     });
 
-    function dayLabelFromIndex(idx) {
-        if (idx === 1) return '7日前';
-        if (idx === 2) return '6日前';
-        if (idx === 3) return '5日前';
-        if (idx === 4) return '4日前';
-        if (idx === 5) return '3日前';
-        if (idx === 6) return '2日前';
-        if (idx === 7) return '1日前';
-        return '当日(途中まで)';
-    }
-
     function renderResult(data) {
         if (!data.top5 || data.top5.length === 0) {
             resultDiv.textContent = '有効な結果がありません。';
@@ -363,52 +356,52 @@
         const expTh     = data.explosion_threshold.toFixed(1);
 
         const rowsHtml = data.top5.map((row, idx) => {
-            const winRate         = (row.win_rate * 100).toFixed(1) + '%';
-            const avgProfit       = row.avg_profit.toFixed(0);
-            const maxInvest90     = row.max_invest_90.toFixed(0);
-            const maxPayout90     = row.max_payout_90.toFixed(0);
-            const explosionRate   = (row.explosion_rate * 100).toFixed(1) + '%';
-            const explosionSpins  = row.explosion_rate > 0 ? row.explosion_spins_avg.toFixed(0)   : '-';
-            const explosionInvest = row.explosion_rate > 0 ? row.explosion_invest_avg.toFixed(0) : '-';
+            const winRate           = (row.win_rate * 100).toFixed(1) + '%';
+            const avgProfitBalls    = row.avg_profit.toFixed(0);          // 玉
+            const maxPayout90Balls  = row.max_payout_90.toFixed(0);       // 玉
+            const maxInvest90Yen    = Math.round(row.max_invest_90 * YEN_PER_BALL);  // 円
+            const explosionRate     = (row.explosion_rate * 100).toFixed(1) + '%';
+            const explosionSpins    = row.explosion_rate > 0 ? row.explosion_spins_avg.toFixed(0) : '-';
+            const explosionInvestYen = row.explosion_rate > 0
+                ? Math.round(row.explosion_invest_avg * YEN_PER_BALL)
+                : '-';
 
             return `
                 <tr>
                     <td>${idx + 1}</td>
-                    <td>${dayLabelFromIndex(row.day_index)}</td>
                     <td>${row.machine_no}</td>
                     <td>${winRate}</td>
-                    <td>${avgProfit}</td>
-                    <td>${maxInvest90}</td>
-                    <td>${maxPayout90}</td>
+                    <td>${avgProfitBalls}</td>
+                    <td>${maxInvest90Yen}</td>
+                    <td>${maxPayout90Balls}</td>
                     <td>${explosionRate}</td>
                     <td>${explosionSpins}</td>
-                    <td>${explosionInvest}</td>
+                    <td>${explosionInvestYen}</td>
                 </tr>
             `;
         }).join('');
 
         resultDiv.innerHTML = `
             <div class="info-box">
-                <div><span class="badge">内部推定</span> 大当り1回あたり平均出玉: <strong>${avgPayout}</strong></div>
-                <div><span class="badge">内部推定</span> 1セット上限(目安): <strong>${oneSetMax}</strong></div>
-                <div><span class="badge">爆発条件</span> 1回の連チャン合計出玉が <strong>${expTh}</strong> を超えたら「爆発」と判定</div>
+                <div><span class="badge">内部推定</span> 大当り1回あたり平均出玉: <strong>${avgPayout}</strong> 玉</div>
+                <div><span class="badge">内部推定</span> 1セット上限(目安): <strong>${oneSetMax}</strong> 玉</div>
+                <div><span class="badge">爆発条件</span> 1回の連チャン合計出玉が <strong>${expTh}</strong> 玉を超えたら「爆発」と判定</div>
                 <div style="margin-top:0.25rem;font-size:0.8rem;color:#6b7280;">
-                    ※ モンテカルロ試行回数: <strong>${data.n_sim}</strong> 回
+                    ※ モンテカルロ試行回数: <strong>${data.n_sim}</strong> 回 / 投資額は 1玉=4円換算で円表示しています。
                 </div>
             </div>
             <table>
                 <thead>
                     <tr>
                         <th>順位</th>
-                        <th>日</th>
                         <th>台番号</th>
                         <th>勝率</th>
-                        <th>平均差玉</th>
-                        <th>最大投資(90%目安)</th>
-                        <th>最大出玉(90%目安)</th>
+                        <th>平均差玉(玉)</th>
+                        <th>最大投資(90%目安・円)</th>
+                        <th>最大出玉(90%目安・玉)</th>
                         <th>爆発が起きる確率</th>
                         <th>爆発まで平均回転数</th>
-                        <th>爆発まで平均投資額</th>
+                        <th>爆発まで平均投資額(円)</th>
                     </tr>
                 </thead>
                 <tbody>
